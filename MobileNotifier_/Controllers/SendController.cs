@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,38 +10,22 @@ namespace MobileNotifier_.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class SendController : ControllerBase
     {
-        // GET api/values
+        // GET api/send
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        public void Send(string apiToken, string userKey, string message)
         {
-            return new string[] { "value1", "value2" };
-        }
+            var parameters = new NameValueCollection {
+                        { "token", apiToken },
+                        { "user", userKey },
+                        { "message", message }
+            };
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            using (var client = new WebClient())
+            {
+                client.UploadValues("https://api.pushover.net/1/messages.json", parameters);
+            }
         }
     }
 }
